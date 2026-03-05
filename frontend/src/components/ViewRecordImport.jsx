@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Upload, message, Card } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
-import { viewRecordAPI } from '../services/api';
+import { parseViewRecordExcel } from '../utils/excelParser';
+import { getMembers, compareMembers } from '../utils/storage';
 
 const { Dragger } = Upload;
 
@@ -12,18 +13,35 @@ function ViewRecordImport({ onImportSuccess }) {
     setLoading(true);
 
     try {
-      const result = await viewRecordAPI.importViewRecord(file);
+      // 获取会员名单
+      const members = getMembers();
+
+      if (members.length === 0) {
+        message.error('请先导入会员名单');
+        return false;
+      }
+
+      // 解析观看名单Excel
+      const viewedUserIds = await parseViewRecordExcel(file);
+
+      if (viewedUserIds.length === 0) {
+        message.error('Excel中没有找到有效的观看数据');
+        return false;
+      }
+
+      // 对比数据
+      const result = compareMembers(members, viewedUserIds);
 
       message.success(
-        `${result.message}，总会员: ${result.stats.totalMembers}，已观看: ${result.stats.viewedCount}，未观看: ${result.stats.missedCount}`
+        `观看名单导入成功，总会员: ${result.totalMembers}，已观看: ${result.viewedCount}，未观看: ${result.missedCount}`
       );
 
-      // 通知父组件，传递recordId
+      // 通知父组件，传递对比结果
       if (onImportSuccess) {
-        onImportSuccess(result.recordId);
+        onImportSuccess(result);
       }
     } catch (error) {
-      message.error('导入失败: ' + (error.response?.data?.error || error.message));
+      message.error('导入失败: ' + error.message);
     } finally {
       setLoading(false);
     }

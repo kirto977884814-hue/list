@@ -1,44 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Table, Statistic, Row, Col, Spin, Alert } from 'antd';
+import React, { useEffect } from 'react';
+import { Card, Table, Statistic, Row, Col, Alert } from 'antd';
 import { UserOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import { viewRecordAPI } from '../services/api';
 
-function ResultDisplay({ recordId }) {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
-
+function ResultDisplay({ result }) {
   useEffect(() => {
-    if (recordId) {
-      fetchData();
+    if (result) {
+      console.log('对比结果:', result);
     }
-  }, [recordId]);
+  }, [result]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const result = await viewRecordAPI.getMissedMembers(recordId);
-      setData(result);
-    } catch (error) {
-      console.error('获取数据失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (!result) {
     return (
       <Card title="对比结果">
-        <div style={{ textAlign: 'center', padding: '40px' }}>
-          <Spin size="large" tip="正在加载..." />
-        </div>
-      </Card>
-    );
-  }
-
-  if (!data) {
-    return (
-      <Card title="对比结果">
-        <Alert message="暂无数据" type="info" />
+        <Alert message="暂无数据，请先导入观看名单" type="info" />
       </Card>
     );
   }
@@ -46,8 +20,8 @@ function ResultDisplay({ recordId }) {
   const columns = [
     {
       title: '用户ID',
-      dataIndex: 'user_id',
-      key: 'user_id',
+      dataIndex: 'userId',
+      key: 'userId',
       width: '50%',
     },
     {
@@ -60,10 +34,10 @@ function ResultDisplay({ recordId }) {
 
   return (
     <Card
-      title={`对比结果 - ${data.record.recordName}`}
+      title="对比结果"
       extra={
         <span style={{ fontSize: '14px', color: '#999' }}>
-          导入时间: {new Date(data.record.importTime).toLocaleString('zh-CN')}
+          生成时间: {new Date().toLocaleString('zh-CN')}
         </span>
       }
     >
@@ -71,7 +45,7 @@ function ResultDisplay({ recordId }) {
         <Col span={8}>
           <Statistic
             title="总会员数"
-            value={data.record.totalMembers}
+            value={result.totalMembers}
             suffix="人"
             prefix={<UserOutlined />}
             valueStyle={{ color: '#1890ff' }}
@@ -80,7 +54,7 @@ function ResultDisplay({ recordId }) {
         <Col span={8}>
           <Statistic
             title="已观看"
-            value={data.record.viewedCount}
+            value={result.viewedCount}
             suffix="人"
             prefix={<EyeOutlined />}
             valueStyle={{ color: '#52c41a' }}
@@ -89,7 +63,7 @@ function ResultDisplay({ recordId }) {
         <Col span={8}>
           <Statistic
             title="未观看"
-            value={data.record.missedCount}
+            value={result.missedCount}
             suffix="人"
             prefix={<EyeInvisibleOutlined />}
             valueStyle={{ color: '#ff4d4f' }}
@@ -98,16 +72,16 @@ function ResultDisplay({ recordId }) {
       </Row>
 
       <Alert
-        message={`共有 ${data.record.missedCount} 名会员未观看直播`}
-        type={data.record.missedCount > 0 ? 'warning' : 'success'}
+        message={`共有 ${result.missedCount} 名会员未观看直播`}
+        type={result.missedCount > 0 ? 'warning' : 'success'}
         showIcon
         style={{ marginBottom: 16 }}
       />
 
       <Table
         columns={columns}
-        dataSource={data.missedMembers}
-        rowKey="user_id"
+        dataSource={result.missedMembers}
+        rowKey="userId"
         pagination={{
           pageSize: 20,
           showSizeChanger: true,

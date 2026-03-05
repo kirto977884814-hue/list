@@ -5,13 +5,13 @@ import ViewRecordImport from '../components/ViewRecordImport';
 import ResultDisplay from '../components/ResultDisplay';
 
 const { Header, Content } = Layout;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 function Dashboard() {
-  const [recordId, setRecordId] = useState(null);
+  const [compareResult, setCompareResult] = useState(null);
 
-  const handleViewImportSuccess = (id) => {
-    setRecordId(id);
+  const handleViewImportSuccess = (result) => {
+    setCompareResult(result);
   };
 
   return (
@@ -47,7 +47,7 @@ function Dashboard() {
             <Divider />
 
             {/* 结果展示 */}
-            {recordId && <ResultDisplay recordId={recordId} />}
+            {compareResult && <ResultDisplay result={compareResult} />}
 
           </Space>
         </div>

@@ -1,24 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Upload, message, Card, Statistic, Button, Space } from 'antd';
-import { InboxOutlined, ReloadOutlined } from '@ant-design/icons';
-import { memberAPI } from '../services/api';
+import { InboxOutlined, ReloadOutlined, DeleteOutlined } from '@ant-design/icons';
+import { parseMemberExcel } from '../utils/excelParser';
+import { saveMembers, getMemberStats } from '../utils/storage';
 
 const { Dragger } = Upload;
 
 function MemberImport({ onImportSuccess }) {
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({ totalMembers: 0, lastUpdated: null });
 
-  const fetchStats = async () => {
-    try {
-      const data = await memberAPI.getStats();
-      setStats(data);
-    } catch (error) {
-      console.error('获取统计信息失败:', error);
-    }
+  const fetchStats = () => {
+    const data = getMemberStats();
+    setStats(data);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchStats();
   }, []);
 
@@ -26,19 +23,32 @@ function MemberImport({ onImportSuccess }) {
     setLoading(true);
 
     try {
-      const result = await memberAPI.importMembers(file);
+      const members = await parseMemberExcel(file);
 
-      message.success(`${result.message}，共导入 ${result.count} 名会员`);
+      if (members.length === 0) {
+        message.error('Excel中没有找到有效的会员数据');
+        return false;
+      }
+
+      // 保存到本地存储
+      const saved = saveMembers(members);
+
+      if (!saved) {
+        message.error('保存数据失败，请检查浏览器存储空间');
+        return false;
+      }
+
+      message.success(`会员名单导入成功，共导入 ${members.length} 名会员`);
 
       // 刷新统计信息
-      await fetchStats();
+      fetchStats();
 
       // 通知父组件
       if (onImportSuccess) {
         onImportSuccess();
       }
     } catch (error) {
-      message.error('导入失败: ' + (error.response?.data?.error || error.message));
+      message.error('导入失败: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -59,23 +69,28 @@ function MemberImport({ onImportSuccess }) {
     <Card
       title="会员名单导入"
       extra={
-        <Button
-          icon={<ReloadOutlined />}
-          onClick={fetchStats}
-          size="small"
-        >
-          刷新
-        </Button>
+        <Space>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={fetchStats}
+            size="small"
+          >
+            刷新
+          </Button>
+        </Space>
       }
     >
       <Space direction="vertical" style={{ width: '100%' }} size="large">
         <div style={{ textAlign: 'center' }}>
-          {stats && (
-            <Statistic
-              title="当前会员总数"
-              value={stats.totalMembers}
-              suffix="人"
-            />
+          <Statistic
+            title="当前会员总数"
+            value={stats.totalMembers}
+            suffix="人"
+          />
+          {stats.lastUpdated && (
+            <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
+              最后更新: {new Date(stats.lastUpdated).toLocaleString('zh-CN')}
+            </div>
           )}
         </div>
 
