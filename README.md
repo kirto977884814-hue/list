@@ -44,13 +44,13 @@ live-view-checker/
 
 ### 1. 安装依赖
 
-#### 后端
+**后端**
 ```bash
 cd backend
 npm install
 ```
 
-#### 前端
+**前端**
 ```bash
 cd frontend
 npm install
@@ -58,14 +58,14 @@ npm install
 
 ### 2. 启动服务
 
-#### 启动后端（终端1）
+**启动后端（终端1）**
 ```bash
 cd backend
 npm start
 ```
 后端将运行在 http://localhost:3001
 
-#### 启动前端（终端2）
+**启动前端（终端2）**
 ```bash
 cd frontend
 npm run dev
@@ -82,11 +82,14 @@ npm run dev
 ## Excel文件格式要求
 
 ### 会员名单（members.xlsx）
+
 必须包含以下两列：
+
 - 用户ID
 - 用户昵称
 
 示例：
+
 ```
 用户ID    用户昵称
 1001      张三
@@ -95,10 +98,13 @@ npm run dev
 ```
 
 ### 观看直播名单（view_records.xlsx）
+
 必须包含以下列：
+
 - 用户ID
 
 示例：
+
 ```
 用户ID
 1001
@@ -108,11 +114,13 @@ npm run dev
 ## API接口
 
 ### 会员管理
+
 - `POST /api/members/import` - 导入会员名单
 - `GET /api/members/stats` - 获取会员统计
 - `GET /api/members` - 获取所有会员
 
 ### 观看记录
+
 - `POST /api/view-records/import` - 导入观看名单
 - `GET /api/view-records/:id/result` - 获取未观看会员
 - `GET /api/view-records` - 获取观看记录列表
@@ -123,15 +131,18 @@ npm run dev
 
 1. 修改 `frontend/.env` 文件，设置后端API地址
 2. 构建前端项目：
+
 ```bash
 cd frontend
 npm run build
 ```
+
 3. 将 `dist` 目录部署到GitHub Pages
 
 ### 后端部署
 
 推荐使用免费的云平台部署：
+
 - Render (https://render.com)
 - Railway (https://railway.app)
 - Fly.io (https://fly.io)
