@@ -69,12 +69,14 @@ export function clearMembers() {
  * @returns {Object} 对比结果
  */
 export function compareMembers(members, viewedUserIds) {
-  const viewedSet = new Set(viewedUserIds);
+  // 去重观看的用户ID
+  const uniqueViewedIds = [...new Set(viewedUserIds)];
+  const viewedSet = new Set(uniqueViewedIds);
   const missedMembers = members.filter(m => !viewedSet.has(m.userId));
 
   return {
     totalMembers: members.length,
-    viewedCount: viewedUserIds.length,
+    viewedCount: uniqueViewedIds.length,
     missedCount: missedMembers.length,
     missedMembers: missedMembers
   };

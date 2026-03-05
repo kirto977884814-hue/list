@@ -1,14 +1,8 @@
-import React, { useEffect } from 'react';
-import { Card, Table, Statistic, Row, Col, Alert } from 'antd';
-import { UserOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import React from 'react';
+import { Card, Statistic, Row, Col, Alert } from 'antd';
+import { UserOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 
 function ResultDisplay({ result }) {
-  useEffect(() => {
-    if (result) {
-      console.log('对比结果:', result);
-    }
-  }, [result]);
-
   if (!result) {
     return (
       <Card title="对比结果">
@@ -42,7 +36,7 @@ function ResultDisplay({ result }) {
       }
     >
       <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={8}>
+        <Col span={12}>
           <Statistic
             title="总会员数"
             value={result.totalMembers}
@@ -51,16 +45,7 @@ function ResultDisplay({ result }) {
             valueStyle={{ color: '#1890ff' }}
           />
         </Col>
-        <Col span={8}>
-          <Statistic
-            title="已观看"
-            value={result.viewedCount}
-            suffix="人"
-            prefix={<EyeOutlined />}
-            valueStyle={{ color: '#52c41a' }}
-          />
-        </Col>
-        <Col span={8}>
+        <Col span={12}>
           <Statistic
             title="未观看"
             value={result.missedCount}
@@ -78,17 +63,21 @@ function ResultDisplay({ result }) {
         style={{ marginBottom: 16 }}
       />
 
-      <Table
-        columns={columns}
-        dataSource={result.missedMembers}
-        rowKey="userId"
-        pagination={{
-          pageSize: 20,
-          showSizeChanger: true,
-          showTotal: (total) => `共 ${total} 条记录`,
-        }}
-        scroll={{ y: 400 }}
-      />
+      {/* 未观看会员列表 */}
+      {result.missedMembers && result.missedMembers.length > 0 && (
+        <Card
+          title="未观看会员名单"
+          size="small"
+          style={{ marginTop: 16 }}
+        >
+          {result.missedMembers.map(member => (
+            <div key={member.userId} style={{ padding: '8px 0', borderBottom: '1px solid #f0f0f0' }}>
+              <span style={{ fontWeight: 'bold', marginRight: '16px' }}>{member.userId}</span>
+              <span>{member.nickname}</span>
+            </div>
+          ))}
+        </Card>
+      )}
     </Card>
   );
 }
