@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, message, Card, Statistic, Button, Space, Collapse } from 'antd';
-import { InboxOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Upload, Button, Space, Typography, Collapse, message } from 'antd';
+import { UploadOutlined, ReloadOutlined } from '@ant-design/icons';
 import { parseMemberExcel } from '../utils/excelParser';
 import { saveMembers, getMemberStats } from '../utils/storage';
 
-const { Dragger } = Upload;
+const { Text } = Typography;
 
 function MemberImport({ onImportSuccess }) {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({ totalMembers: 0, lastUpdated: null });
   const [hasData, setHasData] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const fetchStats = () => {
     const data = getMemberStats();
     setStats(data);
-    setHasData(data.totalMembers > 0);
+    const hasMembers = data.totalMembers > 0;
+    setHasData(hasMembers);
+    // 有数据时自动折叠
+    if (hasMembers) {
+      setIsCollapsed(true);
+    }
   };
 
   useEffect(() => {
@@ -45,6 +51,9 @@ function MemberImport({ onImportSuccess }) {
       // 刷新统计信息
       fetchStats();
 
+      // 导入成功后自动折叠
+      setIsCollapsed(true);
+
       // 通知父组件
       if (onImportSuccess) {
         onImportSuccess();
@@ -60,31 +69,36 @@ function MemberImport({ onImportSuccess }) {
 
   const uploadProps = {
     name: 'file',
-    multiple: false,
-    accept: '.xlsx,.xls',
-    beforeUpload: handleUpload,
     showUploadList: false,
+    beforeUpload: handleUpload,
     disabled: loading,
+    accept: '.xlsx,.xls',
   };
 
-  // 如果已经有数据，默认折叠
   const collapseItems = [
     {
       key: '1',
       label: hasData ? `会员名单已导入 (${stats.totalMembers}人) - 点击修改` : '导入会员名单',
       children: (
-        <Space direction="vertical" style={{ width: '100%' }} size="large">
-          <Dragger {...uploadProps}>
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-            <p className="ant-upload-hint">
-              支持 .xlsx 或 .xls 格式的Excel文件
-              <br />
-              文件需包含"用户ID"和"用户昵称"两列
-            </p>
-          </Dragger>
+        <Space direction="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>
+          <div>
+            <Text type="secondary">上传包含"用户ID"和"用户昵称"的Excel文件</Text>
+          </div>
+          <Upload {...uploadProps}>
+            <Button
+              type="primary"
+              size="large"
+              icon={<UploadOutlined />}
+              loading={loading}
+            >
+              点击上传会员名单
+            </Button>
+          </Upload>
+          <div>
+            <Text type="secondary" style={{ fontSize: '12px' }}>
+              支持 .xlsx 或 .xls 格式
+            </Text>
+          </div>
         </Space>
       ),
     },
@@ -93,9 +107,10 @@ function MemberImport({ onImportSuccess }) {
   return (
     <Collapse
       items={collapseItems}
-      defaultActiveKey={hasData ? [] : ['1']}
+      activeKey={isCollapsed ? [] : ['1']}
+      onChange={(keys) => setIsCollapsed(keys.length === 0)}
       bordered={false}
-      style={{ background: '#fff', borderRadius: '8px' }}
+      style={{ background: 'transparent' }}
     />
   );
 }
