@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Upload, message, Card } from 'antd';
-import { InboxOutlined } from '@ant-design/icons';
+import { Upload, Button, Space, Typography, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import { parseViewRecordExcel } from '../utils/excelParser';
 import { getMembers, compareMembers } from '../utils/storage';
 
-const { Dragger } = Upload;
+const { Text } = Typography;
 
 function ViewRecordImport({ onImportSuccess }) {
   const [loading, setLoading] = useState(false);
@@ -32,9 +32,7 @@ function ViewRecordImport({ onImportSuccess }) {
       // 对比数据
       const result = compareMembers(members, viewedUserIds);
 
-      message.success(
-        `观看名单导入成功，总会员: ${result.totalMembers}，已观看: ${result.viewedCount}，未观看: ${result.missedCount}`
-      );
+      message.success(`观看名单导入成功，未观看: ${result.missedCount}人`);
 
       // 通知父组件，传递对比结果
       if (onImportSuccess) {
@@ -51,27 +49,35 @@ function ViewRecordImport({ onImportSuccess }) {
 
   const uploadProps = {
     name: 'file',
-    multiple: false,
-    accept: '.xlsx,.xls',
-    beforeUpload: handleUpload,
     showUploadList: false,
+    beforeUpload: handleUpload,
     disabled: loading,
+    accept: '.xlsx,.xls',
   };
 
   return (
-    <Card title="观看名单导入">
-      <Dragger {...uploadProps}>
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-        <p className="ant-upload-hint">
-          支持 .xlsx 或 .xls 格式的Excel文件
-          <br />
-          文件需包含"用户ID"列
-        </p>
-      </Dragger>
-    </Card>
+    <div style={{ textAlign: 'center', padding: '24px 0' }}>
+      <Space direction="vertical" size="large">
+        <div>
+          <Text type="secondary">导入观看直播名单</Text>
+        </div>
+        <Upload {...uploadProps}>
+          <Button
+            type="primary"
+            size="large"
+            icon={<UploadOutlined />}
+            loading={loading}
+          >
+            点击上传观看名单
+          </Button>
+        </Upload>
+        <div>
+          <Text type="secondary" style={{ fontSize: '12px' }}>
+            支持 .xlsx 或 .xls 格式
+          </Text>
+        </div>
+      </Space>
+    </div>
   );
 }
 

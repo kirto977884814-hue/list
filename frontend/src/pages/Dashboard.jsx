@@ -23,26 +23,20 @@ function Dashboard() {
       </Header>
 
       <Content style={{ padding: '24px', background: '#f0f2f5' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <Space direction="vertical" style={{ width: '100%' }} size="large">
 
-            {/* 使用说明 */}
+            {/* 会员名单导入 - 可折叠 */}
             <div style={{ background: '#fff', padding: '16px', borderRadius: '8px' }}>
-              <Title level={4}>使用说明</Title>
-              <ol style={{ paddingLeft: 20, margin: 0 }}>
-                <li>首先导入会员名单Excel（包含"用户ID"和"用户昵称"两列）</li>
-                <li>然后导入观看直播名单Excel（包含"用户ID"列）</li>
-                <li>系统自动对比并展示未观看直播的会员名单</li>
-              </ol>
+              <MemberImport />
             </div>
 
             <Divider />
 
-            {/* 会员名单导入 */}
-            <MemberImport />
-
-            {/* 观看名单导入 */}
-            <ViewRecordImport onImportSuccess={handleViewImportSuccess} />
+            {/* 观看名单导入 - 简洁按钮 */}
+            <div style={{ background: '#fff', padding: '16px', borderRadius: '8px' }}>
+              <ViewRecordImport onImportSuccess={handleViewImportSuccess} />
+            </div>
 
             <Divider />
 
